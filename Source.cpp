@@ -163,22 +163,40 @@ int advance(char input, int arr[][numChars], int currentState)
 
 //BELOW IS CODE THAT NEEDS TO BE MERGED INTO PRECEEDING CODE
 /*
+
+
+*************** The code works just having trouble to print the first stuff out I dont know if I'm even if it's incrememnting***
 #include <iostream>
 #include <string>
 #include <fstream>
 #include <sstream>
 #include <locale>
+#include <cstdlib>
 
 using namespace std;
 
-void output();
-int lineNum = 1;
-string define;
+int lineNum = 1;	//Line number for tokens
+string define;		//Global variable for the string
 
-string getChar();
-int ID;
+//A lexer class to hold all the information and functions
+class lexer {
+public:
+	lexer();
+	void setupID();
+	void outPutStream();
+	void clear();
+	int isKeyWD(string a);
+	int isDG(char a);
+	int isPunct(char a);
+	int isMultiPunc(char a, char b);
+	int isSpace(char);
 
-struct lex {
+private:
+	int ID;				//The idenifier number
+	string inputSt;			//
+	string token;			//The token
+	string identifier;		//The identifier
+	string placeHolder;		//Placing the char togther in a string
 
 };
 
@@ -186,184 +204,179 @@ struct lex {
 int main()
 {
 	ifstream inFile;
-	inFile.open("lexerExamp.txt");
+	inFile.open("check.txt"); 		//File opening
 	while (getline(inFile, define))
 	{
-		getChar();
+		lexer();			//Going into the lexer function
 		lineNum++;
 	}
 	return 0;
 }
 
-
-void output()
+//The Lexer function where it does all the work.
+lexer::lexer()
 {
-	/*cout << "(:Token " << lineNum << keyWD << ")" << endl;
-	if (option == 3)
+	int x = 0;			//Counter for the length of the string
+	do
 	{
-	cout << ":ix " << ixNum;
+		char pl = define[x]; 		//first character in here
+		if (isSpace(pl))		//Skipping the space
+			continue;
+		else if (pl == '"')		//Look for the quote mark
+		{
+			x++;
+			while (pl != '"')	//A while to insert the values and to get the char of string
+			{
+				placeHolder += pl;
+				x++;
+				pl = define[x];
+			}
+			token = placeHolder;	//chars into the token
+			identifier = "string";  //using it to identify the token part as a string
+			setupID();		//Going into the function to get the ID by the token and identifier
+			outPutStream();		//Output the stream
+			//clearStream();	//Nead to clear for the next token
+		}
+		else if (isalpha(pl))		//Working on this meow
+		{
+
+		}
+		x++;				//Incrementing the counter	
+	} while (x == define.length());		//finish when the counter is the same length as of the string
+}
+
+
+//Function to ouput the token stuff
+//Has levels for the type of ID
+void lexer::outPutStream()
+{
+	cout << ID;
+	while (ID != 0)
+	{
+		cout << "(:Token " << lineNum << ID << ")" << endl;
+		if (ID == 3)
+		{
+			cout << ":ix " << token;
+		}
+		else if (ID == 2)
+		{
+			cout << ":str" << "" << token << "" << ")";
+		}
 	}
-	else if (option == 2)
+}
+
+//The function for is there a space
+int lexer::isSpace(char a)
+{
+	if (a == ' ')
 	{
-	cout << ":str" << "" << define << "" << ")";
-	}
-	*/
-}
-
-string getChar()
-{
-
-}
-
-
-void lexerLine(string str)
-{
-	string token;
-	stringstream stringStream(str);
-	bool commentFound;
-	while (stringStream >> token && !commentFound)
-	{
-		//token[0]
-		if (isalpha(str[0]))
-			//void
-			alphAFunc(token);
-		else if (isdigit(str[0]))
-			//void
-			digitFunc(token);
-		else 
-			//void
-			commentFound = symbolFunc(token);
-			
-	}
-}
-
-
-void alphAFunc(string token)
-{
-
-}
-
-
-bool symbolFunc(string token)
-{
-	// return if comment found
-}
-
-void digitFunc(string token) 
-{
-	if (isdigit[token])
-	{
-		setID();
-	}
-	else if (token == '.')
-	{
-		setID();
+		return 1;
 	}
 	else
-	{
 		return 0;
-	}
-
 }
 
-
-void setID(string y, string orange)
+//The ID stuff
+void lexer::setupID()
 {
-	if (y == "identifier")
+	if (identifier == "identifier")
 		ID = 2;
-	else if (y = "integer")
+	else if (identifier == "integer")
 		ID = 3;
-	else if (y = "float")
+	else if (identifier == "float")
 		ID = 4;
-	else if (y = "string")
+	else if (identifier == "string")
 		ID = 5;
 	//Unpaired delimiters
-	else if (orange = ",")
+	else if (token == ",")
 		ID = 6;
-	else if (orange = ";")
+	else if (token == ";")
 		ID = 7;
 	//keywords
-	else if (orange = "prog")
+	else if (token == "prog")
 		ID = 10;
-	else if (orange = "main")
+	else if (token == "main")
 		ID = 11;
-	else if (orange = "fcn")
+	else if (token == "fcn")
 		ID = 12;
-	else if (orange = "class")
+	else if (token == "class")
 		ID = 13;
-	else if (orange = "float")
+	else if (token == "float")
 		ID = 15;
-	else if (orange = "int")
+	else if (token == "int")
 		ID = 16;
-	else if (orange = "string")
+	else if (token == "string")
 		ID = 17;
-	else if (orange = "if")
+	else if (token == "if")
 		ID = 18;
-	else if (orange = "elseif")
+	else if (token == "elseif")
 		ID = 19;
-	else if (orange = "else")
+	else if (token == "else")
 		ID = 20;
-	else if (orange = "while")
+	else if (token == "while")
 		ID = 21;
-	else if (orange = "input")
+	else if (token == "input")
 		ID = 22;
-	else if (orange = "print")
+	else if (token == "print")
 		ID = 23;
-	else if (orange = "new")
+	else if (token == "new")
 		ID = 24;
-	else if (orange = "return")
+	else if (token == "return")
 		ID = 25;
 	// Paired delieters
-	else if (orange = "<")
+	else if (token == "<")
 		ID = 31;
-	else if (orange = ">")
+	else if (token == ">")
 		ID = 32;
-	else if (orange = "{")
+	else if (token == "{")
 		ID = 33;
-	else if (orange = "}")
+	else if (token == "}")
 		ID = 34;
-	else if (orange = "[")
+	else if (token == "[")
 		ID = 35;
-	else if (orange = "]")
+	else if (token == "]")
 		ID = 35;
-	else if (orange = "(")
+	else if (token == "(")
 		ID = 37;
-	else if (orange = ")")
+	else if (token == ")")
 		ID = 38;
 	//Other punctuation
-	else if (orange = "*")
+	else if (token == "*")
 		ID = 41;
-	else if (orange = "^")
+	else if (token == "^")
 		ID = 42;
-	else if (orange = ":")
+	else if (token == ":")
 		ID = 43;
-	else if (orange = ".")
+	else if (token == ".")
 		ID = 44;
-	else if (orange = "=")
+	else if (token == "=")
 		ID = 45;
-	else if (orange = "-")
+	else if (token == "-")
 		ID = 46;
-	else if (orange = "+")
+	else if (token == "+")
 		ID = 47;
-	else if (orange = "/")
+	else if (token == "/")
 		ID = 48;
 	//Multi-char operators
-	else if (orange = "->")
+	else if (token == "->")
 		ID = 51;
-	else if (orange = "==")
+	else if (token == "==")
 		ID = 52;
-	else if (orange = "!=")
+	else if (token == "!=")
 		ID = 53;
-	else if (orange = "<=")
+	else if (token == "<=")
 		ID = 54;
-	else if (orange = ">=")
+	else if (token == ">=")
 		ID = 55;
-	else if (orange = "<<")
+	else if (token == "<<")
 		ID = 56;
-	else if (orange = ">>")
+	else if (token == ">>")
 		ID = 57;
 	//miscellaeous
-	else if (orange = "error")
+	else if (token == "error")
 		ID = 99;
+	else
+		ID = 0;
+
+	return;
 }
-*/
