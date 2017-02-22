@@ -1,0 +1,327 @@
+#include <iostream>
+#include <string>
+#include <fstream>
+#include <sstream>
+#include <locale>
+#include <cstdlib>
+#include <iomanip>
+
+using namespace std;
+
+
+
+class lecounter {
+public:
+	lecounter();
+	void setupID();
+	void outPutStream();
+	void clear();
+	void lexer();
+	void lineLexer(string line);
+	int isKeyWD(string a);
+	int isDG(char a);
+	int isPunct(char a);
+	//int isMultiPunc(char a, char b);
+	int isSpace(char);
+
+private:
+	int ID;
+	string inputSt;
+	string token;
+	string identifier;
+	ifstream mInFile;
+	int lineNum;
+};
+
+
+lecounter::lecounter() {
+	mInFile.open("check.txt");
+}
+
+void lecounter::lexer()
+{
+	string inputString;
+	lineNum = 1;
+	while (getline(mInFile, inputString))
+	{
+		lineLexer(inputString);
+	}
+}
+
+
+void lecounter::lineLexer(string line) {
+	int count = 0;
+	for (size_t i = 0; i < line.length(); ++i)
+	{
+		char firstLetter = line[count];
+		char secLetter = line[count + 1];
+		if (!isSpace(firstLetter)) {
+			string placeHolder;
+			if (firstLetter == '"')
+			{
+				count++;
+				while (firstLetter != '"')
+				{
+					placeHolder += firstLetter;
+					count++;
+					firstLetter = line[count];
+				}
+				token = placeHolder;
+				identifier = "string";
+				setupID();
+				outPutStream();
+				clear();
+			}
+			else if (isalpha(firstLetter) || firstLetter == '_')
+			{
+				placeHolder += firstLetter;
+				while (isalpha(secLetter) || secLetter == '_')
+				{
+					count++;
+					firstLetter = line[count];
+					placeHolder += firstLetter;
+					secLetter = line[count + 1];
+				}
+				if (isKeyWD(placeHolder)) {
+					token = placeHolder;
+				}
+				else {
+					identifier = "identifier";
+					token = placeHolder;
+				}
+				setupID();
+				outPutStream();
+				clear();
+			}
+			else if (isdigit(firstLetter))
+			{
+				placeHolder += firstLetter;
+				identifier = "integer";
+				while (isdigit(secLetter = line[count + 1]))
+				{
+					count++;
+					firstLetter = line[count];
+					placeHolder += firstLetter;
+				}
+				if (secLetter == '.')
+				{
+					count++;
+					firstLetter = line[count];
+					secLetter = line[count + 1];
+					placeHolder += firstLetter;
+					while (isdigit(secLetter = line[count + 1]))
+					{
+						count++; 
+						firstLetter = line[count];
+						placeHolder += firstLetter;
+					}
+					identifier = "float";
+				}
+				token = placeHolder;
+				setupID();
+				outPutStream();
+				clear();
+			}
+			else if (isPunct(firstLetter))
+			{
+				if (firstLetter == '/' && secLetter == '/')
+					break;
+				if (secLetter == ' ')
+				{
+					token = firstLetter;
+					identifier = "punctuation";
+					setupID();
+					outPutStream();
+					clear();
+				}
+			}
+			else if (isDG(firstLetter) == 1)
+			{
+				token = firstLetter;
+				setupID();
+				outPutStream();
+				clear();
+
+			}
+		}
+	}
+	lineNum++;
+}
+
+void lecounter::clear()
+{
+	ID = 0;
+	token = "";
+	identifier = "";
+}
+
+
+void lecounter::outPutStream()
+{
+	
+		cout << "(:Token " << lineNum << " " << ID << " " << token << ")"  <<  endl;
+		if (ID == 3)
+		{
+			cout << ":icount " << token;
+		}
+		else if (ID == 4)
+		{
+			cout << ":str" << "" << token << "" << ")";
+		}
+}
+
+int lecounter::isSpace(char a)
+{
+	if (a == ' ')
+	{
+		return 1;
+	}
+	else
+		return 0;
+}
+
+int lecounter::isKeyWD(string a)
+{
+	if (a == "prog" || a == "main" || a == "fcn" || a == "class" || a == "firstLetteroat" || a == "int" ||
+		a == "string" || a == "if" || a == "elseif" || a == "else" || a == "while" || a == "input" ||
+		a == "print" || a == "new" || a == "return")
+	{
+		return 1;
+	}
+	else
+		return 0;
+
+}
+
+int lecounter::isPunct(char a)
+{
+	if (a == '*' || a == '^' || a == ':' || a == '*' || a == '.' || a == '=' || a == '-' || a == '+' ||
+		a == '+' || a == '/')
+		return 1;
+	else
+		return 0;
+}
+
+int lecounter::isDG(char a)
+{
+	if (a == '<' || a == '>' || a == '{' || a == '}' || a == '[' || a == ']' || a == '(' || a == ')' || a == ',' || a == ';')
+		return 1;
+	else
+		return 0;
+}
+
+
+void lecounter::setupID()
+{
+	if (identifier == "identifier")
+		ID = 2;
+	else if (identifier == "integer")
+		ID = 3;
+	else if (identifier == "firstLetteroat")
+		ID = 4;
+	else if (identifier == "string")
+		ID = 5;
+	//Unpaired delimiters
+	else if (token == ",")
+		ID = 6;
+	else if (token == ";")
+		ID = 7;
+	//keywords
+	else if (token == "prog")
+		ID = 10;
+	else if (token == "main")
+		ID = 11;
+	else if (token == "fcn")
+		ID = 12;
+	else if (token == "class")
+		ID = 13;
+	else if (token == "firstLetteroat")
+		ID = 15;
+	else if (token == "int")
+		ID = 16;
+	else if (token == "string")
+		ID = 17;
+	else if (token == "if")
+		ID = 18;
+	else if (token == "elseif")
+		ID = 19;
+	else if (token == "else")
+		ID = 20;
+	else if (token == "while")
+		ID = 21;
+	else if (token == "input")
+		ID = 22;
+	else if (token == "print")
+		ID = 23;
+	else if (token == "new")
+		ID = 24;
+	else if (token == "return")
+		ID = 25;
+	// Paired delieters
+	else if (token == "<")
+		ID = 31;
+	else if (token == ">")
+		ID = 32;
+	else if (token == "{")
+		ID = 33;
+	else if (token == "}")
+		ID = 34;
+	else if (token == "[")
+		ID = 35;
+	else if (token == "]")
+		ID = 35;
+	else if (token == "(")
+		ID = 37;
+	else if (token == ")")
+		ID = 38;
+	//Other punctuation
+	else if (token == "*")
+		ID = 41;
+	else if (token == "^")
+		ID = 42;
+	else if (token == ":")
+		ID = 43;
+	else if (token == ".")
+		ID = 44;
+	else if (token == "=")
+		ID = 45;
+	else if (token == "-")
+		ID = 46;
+	else if (token == "+")
+		ID = 47;
+	else if (token == "/")
+		ID = 48;
+	//Multi-char operators
+	else if (token == "->")
+		ID = 51;
+	else if (token == "==")
+		ID = 52;
+	else if (token == "!=")
+		ID = 53;
+	else if (token == "<=")
+		ID = 54;
+	else if (token == ">=")
+		ID = 55;
+	else if (token == "<<")
+		ID = 56;
+	else if (token == ">>")
+		ID = 57;
+	//miscellaeous
+	else if (token == "error")
+		ID = 99;
+	else
+		ID = 0;
+
+	return;
+}
+
+
+
+int main()
+{
+	lecounter* counter = new lecounter();
+	counter->lexer();
+
+	system("pause");
+	return 0;
+}
