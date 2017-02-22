@@ -3,9 +3,9 @@
 #include <fstream>
 
 enum States { start = 1, ident = 2, endIdent = 3, num = 4, endNum = 5, eq = 6, eqeq = 7, semi = 8, floater = 9, endfloater = 10, stringStart = 11, stringEnd = 12, aster = 13, caret = 14, colon = 15,
-			  dot = 16, minus = 17, plus = 18, slash = 19, comment = 20, comma = 21 };
+			  dot = 16, minus = 17, plus = 18, slash = 19, comment = 20, comma = 21, angle1 = 22, angle2 = 23, brace1 = 24, brace2 = 25, bracket1 = 26, bracket2 = 27, parens1 = 28, parens2 = 29 };
 
-const int TABLELENGTH = 75;
+const int TABLELENGTH = 83;
 void createTable(int arr[][TABLELENGTH]);
 void printTable(int arr[][TABLELENGTH]);
 int stateChange(int arr[][TABLELENGTH], int currState, int index);
@@ -20,7 +20,7 @@ int main()
 		std::cout << "Error opening code file.\n";
 	}
 
-	int stateTable[22][TABLELENGTH];  //Generate the State Table
+	int stateTable[30][TABLELENGTH];  //Generate the State Table
 	createTable(stateTable);
 	printTable(stateTable);
 
@@ -50,12 +50,19 @@ int main()
 					c = textLine[charLocation];
 					charLocation++;
 
+					//std::cout << "character: " << c << std::endl;
 					//loop through table and find character
 					int index = 0;
 					while (stateTable[0][index] != int(c) && index <= TABLELENGTH)
 					{
 						index++;
 					}
+					
+					if (index > TABLELENGTH)
+					{
+						break;
+					}
+					//std::cout << "index: " << index << std::endl;
 					
 					//SateChange Function
 					currentState = States(stateChange(stateTable, start, index));
@@ -128,6 +135,32 @@ int main()
 					while (stateTable[0][index] != int(c) && index <= TABLELENGTH)
 					{
 						index++;
+					}
+
+					//std::cout << "index: " << index;
+					//std::cout << TABLELENGTH;
+					if (index > TABLELENGTH)
+					{
+						std::cout << "(:token " << lineNum << " int :str \"";
+						int stringSize = charLocation - tokenLocation;
+						char* temp = new char[stringSize];
+
+						//std::cout << "tokenLocation: " << tokenLocation << std::endl;
+						//std::cout << "stringSize: " << stringSize << std::endl;
+						for (int i = 0; i < stringSize - 1; i++)
+						{
+							temp[i] = textLine[tokenLocation];
+							tokenLocation++;
+						}
+						temp[stringSize - 1] = '\0';
+						currentToken = std::string(temp);
+						delete[] temp;
+
+						currentState = start;
+						charLocation--;
+
+						std::cout << currentToken << "\")" << std::endl;
+						break;
 					}
 
 					//SateChange Function
@@ -294,9 +327,13 @@ int main()
 					charLocation--;
 
 					std::cout << currentToken << "\")" << std::endl;
+
+					tokenLocation++;
+					charLocation++;
 					//std::cout << "Going To State: " << currentState << std::endl;
-					//std::cout << "charLocation: " << charLocation << std::endl << std::endl;
-					//tokenLocation = charLocation;
+					//std::cout << "charLocation: " << charLocation << std::endl;
+					//std::cout << "tokenLocation: " << tokenLocation << std::endl << std::endl;
+					
 					break;
 				}
 				case aster:
@@ -403,6 +440,70 @@ int main()
 					tokenLocation++;
 					break;
 				}
+				case angle1:
+				{
+					std::cout << "(:token " << lineNum << " angle1)" << std::endl;
+					currentState = start;
+					tokenLocation++;
+					
+					break;
+				}
+				case angle2:
+				{
+					std::cout << "(:token " << lineNum << " angle2)" << std::endl;
+					currentState = start;
+					tokenLocation++;
+					
+					break;
+				}
+				case brace1:
+				{
+					std::cout << "(:token " << lineNum << " brace1)" << std::endl;
+					currentState = start;
+					//tokenLocation++;
+					
+					break;
+				}
+				case brace2:
+				{
+					std::cout << "(:token " << lineNum << " brace2)" << std::endl;
+					currentState = start;
+					tokenLocation++;
+					
+					break;
+				}
+				case bracket1:
+				{
+					std::cout << "(:token " << lineNum << " brackets1)" << std::endl;
+					currentState = start;
+					tokenLocation++;
+					
+					break;
+				}
+				case bracket2:
+				{
+					std::cout << "(:token " << lineNum << " brackets2)" << std::endl;
+					currentState = start;
+					tokenLocation++;
+					
+					break;
+				}
+				case parens1:
+				{
+					std::cout << "(:token " << lineNum << " parens1)" << std::endl;
+					currentState = start;
+					tokenLocation++;
+					
+					break;
+				}
+				case parens2:
+				{
+					std::cout << "(:token " << lineNum << " parens2)" << std::endl;
+					currentState = start;
+					tokenLocation++;
+					;
+					break;
+				}
 			}
 		}
 	}
@@ -444,6 +545,16 @@ void createTable(int arr[][TABLELENGTH])
 
 	arr[0][74] = 34; // "
 
+	//Paired Delimiters
+	arr[0][75] = 60; // <
+	arr[0][76] = 62; // >
+	arr[0][77] = 123; // {
+	arr[0][78] = 125; // }
+	arr[0][79] = 91; // [
+	arr[0][80] = 93; // ]
+	arr[0][81] = 40; // (
+	arr[0][82] = 41; // )
+
 	/*-------------------State 1--------------------*/ //start
 	for (int i = 0; i < 53; i++) // LU send to state 2
 	{
@@ -465,6 +576,15 @@ void createTable(int arr[][TABLELENGTH])
 	arr[1][72] = 21; //comma
 	arr[1][73] = 8;
 	arr[1][74] = 11;
+
+	arr[1][75] = 22; // <
+	arr[1][76] = 23; // >
+	arr[1][77] = 24; // {
+	arr[1][78] = 25; // }
+	arr[1][79] = 26; // [
+	arr[1][80] = 27; // ]
+	arr[1][81] = 28; // (
+	arr[1][82] = 29; // )
 
 
 	/*-------------------State 2--------------------*/ //ident
@@ -613,6 +733,54 @@ void createTable(int arr[][TABLELENGTH])
 	for (int i = 0; i < TABLELENGTH; i++) // Anything back to 1
 	{
 		arr[21][i] = 1;
+	}
+
+	/*-------------------State 22--------------------*/ // <
+	for (int i = 0; i < TABLELENGTH; i++) // Anything back to 1
+	{
+		arr[22][i] = 1;
+	}
+
+	/*-------------------State 23--------------------*/ // >
+	for (int i = 0; i < TABLELENGTH; i++) // Anything back to 1
+	{
+		arr[23][i] = 1;
+	}
+
+	/*-------------------State 24--------------------*/ // {
+	for (int i = 0; i < TABLELENGTH; i++) // Anything back to 1
+	{
+		arr[24][i] = 1;
+	}
+
+	/*-------------------State 25--------------------*/ // }
+	for (int i = 0; i < TABLELENGTH; i++) // Anything back to 1
+	{
+		arr[25][i] = 1;
+	}
+
+	/*-------------------State 26--------------------*/ // [
+	for (int i = 0; i < TABLELENGTH; i++) // Anything back to 1
+	{
+		arr[26][i] = 1;
+	}
+
+	/*-------------------State 27--------------------*/ // ]
+	for (int i = 0; i < TABLELENGTH; i++) // Anything back to 1
+	{
+		arr[27][i] = 1;
+	}
+
+	/*-------------------State 28--------------------*/ // (
+	for (int i = 0; i < TABLELENGTH; i++) // Anything back to 1
+	{
+		arr[28][i] = 1;
+	}
+
+	/*-------------------State 29--------------------*/ // )
+	for (int i = 0; i < TABLELENGTH; i++) // Anything back to 1
+	{
+		arr[29][i] = 1;
 	}
 }
 
