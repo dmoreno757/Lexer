@@ -6,8 +6,10 @@ enum States { start = 1, ident = 2, endIdent = 3, num = 4, endNum = 5, eq = 6, e
 			  dot = 16, minus = 17, plus = 18, slash = 19, comment = 20, comma = 21, angle1 = 22, angle2 = 23, brace1 = 24, brace2 = 25, bracket1 = 26, bracket2 = 27, parens1 = 28, parens2 = 29 };
 
 const int TABLELENGTH = 83;
+bool isKey = false;
 void createTable(int arr[][TABLELENGTH]);
 void printTable(int arr[][TABLELENGTH]);
+std::string checkForKey(std::string toCheck);
 int stateChange(int arr[][TABLELENGTH], int currState, int index);
 char peek_token();
 
@@ -98,10 +100,8 @@ int main()
 				case endIdent:
 				{
 					//Create ident token, return to starting state, back up character pointer
-					std::cout << "(:token " << lineNum << " ident :str \"";
 					int stringSize = charLocation - tokenLocation;
 					char* temp = new char[stringSize];
-
 					//std::cout << "tokenLocation: " << tokenLocation << std::endl;
 					//std::cout << "stringSize: " << stringSize << std::endl;
 					for (int i = 0; i < stringSize-1; i++)
@@ -111,17 +111,29 @@ int main()
 					}
 					temp[stringSize-1] = '\0';
 					currentToken = std::string(temp);
+					
 					delete[] temp;
-
+					
 					currentState = start;
 					charLocation--;
-
-					std::cout << currentToken << "\")" << std::endl;
-					//std::cout << "Going To State: " << currentState << std::endl;
-					//std::cout << "charLocation: " << charLocation << std::endl << std::endl;
-					//tokenLocation = charLocation;
 					
+					// Check if identifier is a keyword
+					// If true, then print formatted message for keyword. Else use other format
+					currentToken = checkForKey(currentToken);
+					
+					if (isKey == true)
+					{
+						std::cout << "(:token " << lineNum << " " << currentToken << ")" << std::endl;
+					}
+					else
+					{
+						std::cout << "(:token " << lineNum << " ident :str \"";
 
+						std::cout << currentToken << "\")" << std::endl;
+						//std::cout << "Going To State: " << currentState << std::endl;
+						//std::cout << "charLocation: " << charLocation << std::endl << std::endl;
+						//tokenLocation = charLocation;
+					}
 					break;
 				}
 				case num:
@@ -809,4 +821,47 @@ int stateChange(int arr[][TABLELENGTH], int currState, int index)
 char peek_token()
 {
 	return 0;
+}
+
+std::string checkForKey(std::string toCheck)
+{	
+	std::string temp = toCheck;
+	
+	if (toCheck == "prog")
+		temp = "kwdprog";
+	else if (toCheck == "main")
+		temp = "kwdmain";
+	else if (toCheck == "fcn")
+		temp = "kwdfcn";
+	else if (toCheck == "class")
+		temp = "kwdclass";
+	else if (toCheck == "float")
+		temp = "kwdfloat";
+	else if (toCheck == "int")
+		temp = "kwdint";
+	else if (toCheck == "string")
+		temp = "kwdstring";
+	else if (toCheck == "if")
+		temp = "kwdif";
+	else if (toCheck == "elseif")
+		temp = "kwdelseif";
+	else if (toCheck == "else")
+		temp = "kwdelse";
+	else if (toCheck == "while")
+		temp = "kwdwhile";
+	else if (toCheck == "input")
+		temp = "kwdinput";
+	else if (toCheck == "print")
+		temp = "kwdprint";
+	else if (toCheck == "new")
+		temp = "kwdnew";
+	else if (toCheck == "return")
+		temp = "kwdreturn";
+	
+	if (temp != toCheck) // Its a keyword, so change bool to true
+		isKey = true;
+	else
+		isKey = false;
+	
+	return temp;
 }
