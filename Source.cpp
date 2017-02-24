@@ -2,10 +2,13 @@
 #include <string>
 #include <fstream>
 
-enum States { start = 1, ident = 2, endIdent = 3, num = 4, endNum = 5, eq = 6, eqeq = 7, semi = 8, floater = 9, endfloater = 10, stringStart = 11, stringEnd = 12, aster = 13, caret = 14, colon = 15,
-			  dot = 16, minus = 17, plus = 18, slash = 19, comment = 20, comma = 21, angle1 = 22, angle2 = 23, brace1 = 24, brace2 = 25, bracket1 = 26, bracket2 = 27, parens1 = 28, parens2 = 29 };
+enum States {
+	start = 1, ident = 2, endIdent = 3, num = 4, endNum = 5, eq = 6, eqeq = 7, semi = 8, floater = 9, endfloater = 10, stringStart = 11, stringEnd = 12, aster = 13, caret = 14, colon = 15,
+	dot = 16, minus = 17, plus = 18, slash = 19, comment = 20, comma = 21, angle1 = 22, angle2 = 23, brace1 = 24, brace2 = 25, bracket1 = 26, bracket2 = 27, parens1 = 28, parens2 = 29, oparrow = 30,
+	opne = 31, ople = 32, opge = 33, opshl = 34, opshr = 35, exclaim = 36
+};
 
-const int TABLELENGTH = 83;
+const int TABLELENGTH = 84;
 bool isKey = false;
 void createTable(int arr[][TABLELENGTH]);
 void printTable(int arr[][TABLELENGTH]);
@@ -22,7 +25,7 @@ int main()
 		std::cout << "Error opening code file.\n";
 	}
 
-	int stateTable[30][TABLELENGTH];  //Generate the State Table
+	int stateTable[37][TABLELENGTH];  //Generate the State Table
 	createTable(stateTable);
 	printTable(stateTable);
 
@@ -34,7 +37,7 @@ int main()
 	std::string textLine;
 	std::string currentToken;
 	States currentState = start;
-	
+
 	while (std::getline(input, textLine))
 	{
 		lineNum++;
@@ -47,144 +50,112 @@ int main()
 		{
 			switch (currentState)
 			{
-				case start:
+			case start:
+			{
+				c = textLine[charLocation];
+				charLocation++;
+
+				
+
+				//loop through table and find character
+				int index = 0;
+				while (stateTable[0][index] != int(c) && index <= TABLELENGTH)
 				{
-					c = textLine[charLocation];
-					charLocation++;
+					index++;
+				}
 
-					//std::cout << "character: " << c << std::endl;
-					//loop through table and find character
-					int index = 0;
-					while (stateTable[0][index] != int(c) && index <= TABLELENGTH)
-					{
-						index++;
-					}
-					
-					if (index > TABLELENGTH)
-					{
-						break;
-					}
-					//std::cout << "index: " << index << std::endl;
-					
-					//SateChange Function
-					currentState = States(stateChange(stateTable, start, index));
-					//std::cout << "index: " << index << " character: " << c << std::endl;
-					//std::cout << "Going To State: " << currentState << std::endl << std::endl;
-
-					if (index == 71) //for whitespace
-					{
-						tokenLocation++;
-					}
+				if (index > TABLELENGTH)
+				{
 					break;
 				}
-				case ident:
+				//std::cout << "index: " << index << std::endl;
+
+				//SateChange Function
+				currentState = States(stateChange(stateTable, start, index));
+				//std::cout << "index: " << index << " character: " << c << std::endl;
+				//std::cout << "Going To State: " << currentState << std::endl << std::endl;
+
+				if (index == 71) //for whitespace
 				{
-					c = textLine[charLocation];
-					charLocation++;
-
-					//std::cout << "tokenLocation: " << tokenLocation << std::endl;
-					//loop through table and find character
-					int index = 0;
-					while (stateTable[0][index] != int(c) && index <= TABLELENGTH)
-					{
-						index++;
-					}
-
-					//SateChange Function
-					currentState = States(stateChange(stateTable, ident, index));
-					//std::cout << "index: " << index << " character: " << c << std::endl;
-					//std::cout << "Going To State: " << currentState << std::endl << std::endl;
-
-					break;
+					tokenLocation++;
 				}
-				case endIdent:
-				{
-					//Create ident token, return to starting state, back up character pointer
-					int stringSize = charLocation - tokenLocation;
-					char* temp = new char[stringSize];
-					//std::cout << "tokenLocation: " << tokenLocation << std::endl;
-					//std::cout << "stringSize: " << stringSize << std::endl;
-					for (int i = 0; i < stringSize-1; i++)
-					{
-						temp[i] = textLine[tokenLocation];
-						tokenLocation++;
-					}
-					temp[stringSize-1] = '\0';
-					currentToken = std::string(temp);
-					
-					delete[] temp;
-					
-					currentState = start;
-					charLocation--;
-					
-					// Check if identifier is a keyword
-					// If true, then print formatted message for keyword. Else use other format
-					currentToken = checkForKey(currentToken);
-					
-					if (isKey == true)
-					{
-						std::cout << "(:token " << lineNum << " " << currentToken << ")" << std::endl;
-					}
-					else
-					{
-						std::cout << "(:token " << lineNum << " ident :str \"";
+				break;
+			}
+			case ident:
+			{
+				c = textLine[charLocation];
+				charLocation++;
 
-						std::cout << currentToken << "\")" << std::endl;
-						//std::cout << "Going To State: " << currentState << std::endl;
-						//std::cout << "charLocation: " << charLocation << std::endl << std::endl;
-						//tokenLocation = charLocation;
-					}
-					break;
+				//std::cout << "tokenLocation: " << tokenLocation << std::endl;
+				//loop through table and find character
+				int index = 0;
+				while (stateTable[0][index] != int(c) && index <= TABLELENGTH)
+				{
+					index++;
 				}
-				case num:
+
+				//StateChange Function
+				currentState = States(stateChange(stateTable, ident, index));
+				//std::cout << "index: " << index << " character: " << c << std::endl;
+				//std::cout << "Going To State: " << currentState << std::endl << std::endl;
+
+				break;
+			}
+			case endIdent:
+			{
+				//Create ident token, return to starting state, back up character pointer
+				int stringSize = charLocation - tokenLocation;
+				char* temp = new char[stringSize];
+				//std::cout << "tokenLocation: " << tokenLocation << std::endl;
+				//std::cout << "stringSize: " << stringSize << std::endl;
+				for (int i = 0; i < stringSize - 1; i++)
 				{
-					c = textLine[charLocation];
-					charLocation++;
-
-					//std::cout << "tokenLocation: " << tokenLocation << std::endl;
-					//loop through table and find character
-					int index = 0;
-					while (stateTable[0][index] != int(c) && index <= TABLELENGTH)
-					{
-						index++;
-					}
-
-					//std::cout << "index: " << index;
-					//std::cout << TABLELENGTH;
-					if (index > TABLELENGTH)
-					{
-						std::cout << "(:token " << lineNum << " int :str \"";
-						int stringSize = charLocation - tokenLocation;
-						char* temp = new char[stringSize];
-
-						//std::cout << "tokenLocation: " << tokenLocation << std::endl;
-						//std::cout << "stringSize: " << stringSize << std::endl;
-						for (int i = 0; i < stringSize - 1; i++)
-						{
-							temp[i] = textLine[tokenLocation];
-							tokenLocation++;
-						}
-						temp[stringSize - 1] = '\0';
-						currentToken = std::string(temp);
-						delete[] temp;
-
-						currentState = start;
-						charLocation--;
-
-						std::cout << currentToken << "\")" << std::endl;
-						break;
-					}
-
-					//SateChange Function
-					currentState = States(stateChange(stateTable, num, index));
-					//std::cout << "index: " << index << " character: " << c << std::endl;
-					//std::cout << "Going To State: " << currentState << std::endl << std::endl;
-
-					break;
+					temp[i] = textLine[tokenLocation];
+					tokenLocation++;
 				}
-				case endNum:
+				temp[stringSize - 1] = '\0';
+				currentToken = std::string(temp);
+
+				delete[] temp;
+
+				currentState = start;
+				charLocation--;
+
+				// Check if identifier is a keyword
+				// If true, then print formatted message for keyword. Else use other format
+				currentToken = checkForKey(currentToken);
+
+				if (isKey == true) {
+					std::cout << "(:token " << lineNum << " " << currentToken << ")" << std::endl;
+				}
+				else {
+					std::cout << "(:token " << lineNum << " ident :str \"";
+
+					std::cout << currentToken << "\")" << std::endl;
+					//std::cout << "Going To State: " << currentState << std::endl;
+					//std::cout << "charLocation: " << charLocation << std::endl << std::endl;
+					//tokenLocation = charLocation;
+				}
+
+				break;
+			}
+			case num:
+			{
+				c = textLine[charLocation];
+				charLocation++;
+
+				//std::cout << "tokenLocation: " << tokenLocation << std::endl;
+				//loop through table and find character
+				int index = 0;
+				while (stateTable[0][index] != int(c) && index <= TABLELENGTH)
 				{
-					//Create num token, return to starting state, back up character pointer
+					index++;
+				}
+
+				//std::cout << "index: " << index;
+				//std::cout << TABLELENGTH;
+				if (index > TABLELENGTH)
+				{
 					std::cout << "(:token " << lineNum << " int :str \"";
 					int stringSize = charLocation - tokenLocation;
 					char* temp = new char[stringSize];
@@ -204,75 +175,120 @@ int main()
 					charLocation--;
 
 					std::cout << currentToken << "\")" << std::endl;
-					//std::cout << "Going To State: " << currentState << std::endl;
-					//std::cout << "charLocation: " << charLocation << std::endl << std::endl;
-					//tokenLocation = charLocation;
-
 					break;
 				}
-				case eq:
+
+				//SateChange Function
+				currentState = States(stateChange(stateTable, num, index));
+				//std::cout << "index: " << index << " character: " << c << std::endl;
+				//std::cout << "Going To State: " << currentState << std::endl << std::endl;
+
+				break;
+			}
+			case endNum:
+			{
+				//Create num token, return to starting state, back up character pointer
+				std::cout << "(:token " << lineNum << " int :str \"";
+				int stringSize = charLocation - tokenLocation;
+				char* temp = new char[stringSize];
+
+				//std::cout << "tokenLocation: " << tokenLocation << std::endl;
+				//std::cout << "stringSize: " << stringSize << std::endl;
+				for (int i = 0; i < stringSize - 1; i++)
 				{
-					c = textLine[charLocation];
-					charLocation++;
-
-					//loop through table and find character
-					int index = 0;
-					while (stateTable[0][index] != int(c) && index <= TABLELENGTH)
-					{
-						index++;
-					}
-
-					//SateChange Function
-					currentState = States(stateChange(stateTable, eq, index));
-
-					if (currentState != eqeq) //equal token else its opeq token
-					{
-						std::cout << "(:token " << lineNum << " equal)" << std::endl;
-						charLocation--; //Back up location
-					}
-
-					/*
-					std::cout << "index: " << index << " character: " << c << std::endl;
-					std::cout << "Going To State: " << currentState << std::endl;
-					std::cout << "charLocation: " << charLocation << std::endl << std::endl;
-					*/
-					
-					tokenLocation = charLocation;
-					
-					break;
+					temp[i] = textLine[tokenLocation];
+					tokenLocation++;
 				}
-				case eqeq:
+				temp[stringSize - 1] = '\0';
+				currentToken = std::string(temp);
+				delete[] temp;
+
+				currentState = start;
+				charLocation--;
+
+				std::cout << currentToken << "\")" << std::endl;
+				//std::cout << "Going To State: " << currentState << std::endl;
+				//std::cout << "charLocation: " << charLocation << std::endl << std::endl;
+				//tokenLocation = charLocation;
+
+				break;
+			}
+			case eq:
+			{
+				c = textLine[charLocation];
+				charLocation++;
+
+				//loop through table and find character
+				int index = 0;
+				while (stateTable[0][index] != int(c) && index <= TABLELENGTH)
 				{
-
-
-					break;
+					index++;
 				}
-				case semi:
+
+				//SateChange Function
+				currentState = States(stateChange(stateTable, eq, index));
+
+				if (currentState != eqeq) //equal token else its opeq token
 				{
-					std::cout << "(:token " << lineNum << " semi)" << std::endl;
-					currentState = start;
-					break;
+					std::cout << "(:token " << lineNum << " equal)" << std::endl;
+					charLocation--; //Back up location
 				}
-				case floater:
+
+				if (currentState == eqeq)
 				{
-					c = textLine[charLocation];
-					charLocation++;
-
-					//std::cout << "tokenLocation: " << tokenLocation << std::endl;
-					//loop through table and find character
-					int index = 0;
-					while (stateTable[0][index] != int(c) && index <= TABLELENGTH)
-					{
-						index++;
-					}
-
-					//SateChange Function
-					currentState = States(stateChange(stateTable, floater, index));
-					//std::cout << "index: " << index << " character: " << c << std::endl;
-					//std::cout << "Going To State: " << currentState << std::endl << std::endl;
-					break;
+					charLocation--;
 				}
-				case endfloater:
+
+				/*
+				std::cout << "index: " << index << " character: " << c << std::endl;
+				std::cout << "Going To State: " << currentState << std::endl;
+				std::cout << "charLocation: " << charLocation << std::endl << std::endl;
+				*/
+
+				tokenLocation = charLocation;
+
+				break;
+			}
+			case eqeq:
+			{
+				c = textLine[charLocation];
+				charLocation++;
+
+				int index = 0;
+				currentState = States(stateChange(stateTable, eqeq, index));
+
+				std::cout << "(:token " << lineNum << " opeq)" << std::endl;
+				tokenLocation = charLocation;
+
+
+				break;
+			}
+			case semi:
+			{
+				std::cout << "(:token " << lineNum << " semi)" << std::endl;
+				currentState = start;
+				break;
+			}
+			case floater:
+			{
+				c = textLine[charLocation];
+				charLocation++;
+
+				//std::cout << "tokenLocation: " << tokenLocation << std::endl;
+				//loop through table and find character
+				int index = 0;
+				while (stateTable[0][index] != int(c) && index <= TABLELENGTH)
+				{
+					index++;
+				}
+				
+
+				//SateChange Function
+				currentState = States(stateChange(stateTable, floater, index));
+				
+				//std::cout << "index: " << index << " character: " << c << std::endl;
+				//std::cout << "Going To State: " << currentState << std::endl << std::endl;
+				if (index > TABLELENGTH)
 				{
 					//Create num token, return to starting state, back up character pointer
 					std::cout << "(:token " << lineNum << " float :str \"";
@@ -294,228 +310,408 @@ int main()
 					charLocation--;
 
 					std::cout << currentToken << "\")" << std::endl;
-					//std::cout << "Going To State: " << currentState << std::endl;
-					//std::cout << "charLocation: " << charLocation << std::endl << std::endl;
-					//tokenLocation = charLocation;
 				}
-				case stringStart:
+				break;
+			}
+			case endfloater:
+			{
+				//Create num token, return to starting state, back up character pointer
+				std::cout << "(:token " << lineNum << " float :str \"";
+				int stringSize = charLocation - tokenLocation;
+				char* temp = new char[stringSize];
+
+				//std::cout << "tokenLocation: " << tokenLocation << std::endl;
+				//std::cout << "stringSize: " << stringSize << std::endl;
+				for (int i = 0; i < stringSize - 1; i++)
 				{
-					c = textLine[charLocation];
-					charLocation++;
-
-					//std::cout << "tokenLocation: " << tokenLocation << std::endl;
-					//loop through table and find character
-					int index = 0;
-					while (stateTable[0][index] != int(c) && index <= TABLELENGTH)
-					{
-						index++;
-					}
-
-					//SateChange Function
-					currentState = States(stateChange(stateTable, stringStart, index));
-					//std::cout << "index: " << index << " character: " << c << std::endl;
-					//std::cout << "Going To State: " << currentState << std::endl << std::endl;
-					break;
+					temp[i] = textLine[tokenLocation];
+					tokenLocation++;
 				}
-				case stringEnd:
+				temp[stringSize - 1] = '\0';
+				currentToken = std::string(temp);
+				delete[] temp;
+
+				currentState = start;
+				charLocation--;
+
+				std::cout << currentToken << "\")" << std::endl;
+				//std::cout << "Going To State: " << currentState << std::endl;
+				//std::cout << "charLocation: " << charLocation << std::endl << std::endl;
+				//tokenLocation = charLocation;
+			}
+			case stringStart:
+			{
+				c = textLine[charLocation];
+				charLocation++;
+
+				//std::cout << "tokenLocation: " << tokenLocation << std::endl;
+				//std::cout << "charLocation: " << charLocation << std::endl << std::endl;
+				//loop through table and find character
+				int index = 0;
+				while (stateTable[0][index] != int(c) && index <= TABLELENGTH)
 				{
-					//Create num token, return to starting state, back up character pointer
-					std::cout << "(:token " << lineNum << " string :str ";
-					int stringSize = charLocation - tokenLocation;
-					char* temp = new char[stringSize];
+					index++;
+				}
 
-					//std::cout << "tokenLocation: " << tokenLocation << std::endl;
-					//std::cout << "stringSize: " << stringSize << std::endl;
-					for (int i = 0; i < stringSize - 1; i++)
-					{
-						temp[i] = textLine[tokenLocation];
-						tokenLocation++;
-					}
-					temp[stringSize - 1] = '\0';
-					currentToken = std::string(temp);
-					delete[] temp;
+				//SateChange Function
+				currentState = States(stateChange(stateTable, stringStart, index));
+				if (index >= TABLELENGTH)
+				{
+					currentState = stringStart;
+				}
+			
 
+				break;
+			}
+			case stringEnd:
+			{
+				//charLocation - 1;
+				//std::cout << "charLocation: " << charLocation << std::endl;
+				//Create num token, return to starting state, back up character pointer
+				std::cout << "(:token " << lineNum << " string :str ";
+				int stringSize = charLocation - tokenLocation;
+				char* temp = new char[stringSize];
+
+				//std::cout << "tokenLocation: " << tokenLocation << std::endl;
+				//std::cout << "stringSize: " << stringSize << std::endl;
+				for (int i = 0; i < stringSize - 1; i++)
+				{
+					temp[i] = textLine[tokenLocation];
+					tokenLocation++;
+				}
+				temp[stringSize - 1] = '\0';
+				currentToken = std::string(temp);
+				delete[] temp;
+
+				currentState = start;
+				charLocation--;
+
+				std::cout << currentToken << "\")" << std::endl;
+
+				tokenLocation++;
+				charLocation++;
+				//std::cout << "Going To State: " << currentState << std::endl;
+				//std::cout << "charLocation: " << charLocation << std::endl;
+				//std::cout << "tokenLocation: " << tokenLocation << std::endl << std::endl;
+
+				break;
+			}
+			case aster:
+			{
+				std::cout << "(:token " << lineNum << " aster)" << std::endl;
+				currentState = start;
+				tokenLocation++;
+				break;
+			}
+			case caret:
+			{
+				std::cout << "(:token " << lineNum << " caret)" << std::endl;
+				currentState = start;
+				tokenLocation++;
+				break;
+			}
+			case colon:
+			{
+				std::cout << "(:token " << lineNum << " colon)" << std::endl;
+				currentState = start;
+				tokenLocation++;
+				break;
+			}
+			case dot:
+			{
+				std::cout << "(:token " << lineNum << " dot)" << std::endl;
+				currentState = start;
+				tokenLocation++;
+				break;
+			}
+			case minus:
+			{
+				c = textLine[charLocation];
+				charLocation++;
+
+				//std::cout << "tokenLocation: " << tokenLocation << std::endl;
+				//loop through table and find character
+				int index = 0;
+				while (stateTable[0][index] != int(c) && index <= TABLELENGTH)
+				{
+					index++;
+				}
+
+				//StateChange Function
+				currentState = States(stateChange(stateTable, minus, index));
+				if (currentState == 30) // if the next state ->
+				{
+					charLocation--;
+					//getting send to ->
+				}
+				else if (currentState != 4) //send to digit
+				{
+					std::cout << "(:token " << lineNum << " minus)" << std::endl;
 					currentState = start;
 					charLocation--;
+				}
 
-					std::cout << currentToken << "\")" << std::endl;
 
-					tokenLocation++;
-					charLocation++;
-					//std::cout << "Going To State: " << currentState << std::endl;
-					//std::cout << "charLocation: " << charLocation << std::endl;
-					//std::cout << "tokenLocation: " << tokenLocation << std::endl << std::endl;
-					
-					break;
-				}
-				case aster:
+				tokenLocation++;
+				break;
+			}
+			case plus:
+			{
+				std::cout << "(:token " << lineNum << " plus)" << std::endl;
+				currentState = start;
+				tokenLocation++;
+				break;
+			}
+			case slash:
+			{
+				c = textLine[charLocation];
+				charLocation++;
+
+				//std::cout << "tokenLocation: " << tokenLocation << std::endl;
+				//loop through table and find character
+				int index = 0;
+				while (stateTable[0][index] != int(c) && index <= TABLELENGTH)
 				{
-					std::cout << "(:token " << lineNum << " aster)" << std::endl;
-					currentState = start;
-					tokenLocation++;
-					break;
+					index++;
 				}
-				case caret:
+
+				//StateChange Function
+				currentState = States(stateChange(stateTable, slash, index));
+
+				if (currentState != 20)
 				{
-					std::cout << "(:token " << lineNum << " caret)" << std::endl;
+					std::cout << "(:token " << lineNum << " slash)" << std::endl;
 					currentState = start;
+					charLocation--;
 					tokenLocation++;
-					break;
 				}
-				case colon:
-				{
-					std::cout << "(:token " << lineNum << " colon)" << std::endl;
-					currentState = start;
-					tokenLocation++;
+				if (currentState)
 					break;
-				}
-				case dot:
-				{
-					std::cout << "(:token " << lineNum << " dot)" << std::endl;
-					currentState = start;
-					tokenLocation++;
-					break;
-				}
-				case minus:
+			}
+			case comment:
+			{
+				do
 				{
 					c = textLine[charLocation];
 					charLocation++;
+				} while (c != '\n' && c != '\0');
+				currentState = start;
 
-					//std::cout << "tokenLocation: " << tokenLocation << std::endl;
-					//loop through table and find character
-					int index = 0;
-					while (stateTable[0][index] != int(c) && index <= TABLELENGTH)
-					{
-						index++;
-					}
+				break;
+			}
+			case comma:
+			{
+				std::cout << "(:token " << lineNum << " comma)" << std::endl;
+				currentState = start;
+				tokenLocation++;
+				break;
+			}
+			case angle1:
+			{
+				c = textLine[charLocation];
+				charLocation++;
 
-					//SateChange Function
-					currentState = States(stateChange(stateTable, num, index));
-					//std::cout << "index: " << index << " character: " << c << std::endl;
-					//std::cout << "Going To State: " << currentState << std::endl << std::endl;
-					if (currentState != 4)
-					{
-						std::cout << "(:token " << lineNum << " minus)" << std::endl;
-						currentState = start;
-						charLocation--;
-					}
-					tokenLocation++;
-					break;
-				}
-				case plus:
+				//std::cout << "tokenLocation: " << tokenLocation << std::endl;
+				//loop through table and find character
+				int index = 0;
+				while (stateTable[0][index] != int(c) && index <= TABLELENGTH)
 				{
-					std::cout << "(:token " << lineNum << " plus)" << std::endl;
-					currentState = start;
-					tokenLocation++;
-					break;
+					index++;
 				}
-				case slash:
+
+				//StateChange Function
+				currentState = States(stateChange(stateTable, angle1, index));
+
+				if (currentState == 32 || currentState == 34) //32 - ople <= || 34 - opshl <<
 				{
-					c = textLine[charLocation];
-					charLocation++;
-
-					//std::cout << "tokenLocation: " << tokenLocation << std::endl;
-					//loop through table and find character
-					int index = 0;
-					while (stateTable[0][index] != int(c) && index <= TABLELENGTH)
-					{
-						index++;
-					}
-
-					//StateChange Function
-					currentState = States(stateChange(stateTable, slash, index));
-
-					if (currentState != 20)
-					{
-						std::cout << "(:token " << lineNum << " slash)" << std::endl;
-						currentState = start;
-						charLocation--;
-						tokenLocation++;
-					}
+					//dont need to print anything here, it will print in the next state
+					//tokenLocation++ ?
+					charLocation--;
 					break;
 				}
-				case comment:
-				{
-					do
-					{
-						c = textLine[charLocation];
-						charLocation++;
-					} while (c != '\n' && c!='\0');
-					currentState = start;
-
-					break;
-				}
-				case comma:
-				{
-					std::cout << "(:token " << lineNum << " comma)" << std::endl;
-					currentState = start;
-					tokenLocation++;
-					break;
-				}
-				case angle1:
+				else
 				{
 					std::cout << "(:token " << lineNum << " angle1)" << std::endl;
 					currentState = start;
 					tokenLocation++;
-					
+				}
+
+
+				break;
+			}
+			case angle2:
+			{
+				c = textLine[charLocation];
+				charLocation++;
+				
+				int index = 0;
+				while (stateTable[0][index] != int(c) && index <= TABLELENGTH)
+				{
+					index++;
+				}
+
+				//StateChange Function
+				currentState = States(stateChange(stateTable, angle2, index));
+
+				if (currentState == 33 || currentState == 35) //33 - opge >= || 35 - opshr >>
+				{
+					//dont need to print anything here, it will print in the next state
+					charLocation--;
 					break;
 				}
-				case angle2:
+				else
 				{
 					std::cout << "(:token " << lineNum << " angle2)" << std::endl;
 					currentState = start;
 					tokenLocation++;
-					
-					break;
 				}
-				case brace1:
+
+
+				break;
+			}
+			case brace1:
+			{
+				std::cout << "(:token " << lineNum << " brace1)" << std::endl;
+				currentState = start;
+				//tokenLocation++;
+
+				break;
+			}
+			case brace2:
+			{
+				std::cout << "(:token " << lineNum << " brace2)" << std::endl;
+				currentState = start;
+				tokenLocation++;
+
+				break;
+			}
+			case bracket1:
+			{
+				std::cout << "(:token " << lineNum << " brackets1)" << std::endl;
+				currentState = start;
+				tokenLocation++;
+
+				break;
+			}
+			case bracket2:
+			{
+				std::cout << "(:token " << lineNum << " brackets2)" << std::endl;
+				currentState = start;
+				tokenLocation++;
+
+				break;
+			}
+			case parens1:
+			{
+				std::cout << "(:token " << lineNum << " parens1)" << std::endl;
+				currentState = start;
+				tokenLocation++;
+
+				break;
+			}
+			case parens2:
+			{
+				std::cout << "(:token " << lineNum << " parens2)" << std::endl;
+				currentState = start;
+				tokenLocation++;
+				;
+				break;
+			}
+			case oparrow:
+			{
+				c = textLine[charLocation];
+				charLocation++;
+
+				int index = 0;
+				currentState = States(stateChange(stateTable, oparrow, index));
+
+				std::cout << "(:token " << lineNum << " oparrow)" << std::endl;
+				tokenLocation = charLocation;
+				break;
+			}
+			case opne:
+			{
+				c = textLine[charLocation];
+				charLocation++;
+
+				int index = 0;
+				currentState = States(stateChange(stateTable, opne, index));
+
+				std::cout << "(:token " << lineNum << " opne)" << std::endl;
+				tokenLocation = charLocation;
+				break;
+			}
+			case ople:
+			{
+				c = textLine[charLocation];
+				charLocation++;
+
+				int index = 0;
+				currentState = States(stateChange(stateTable, ople, index));
+
+				std::cout << "(:token " << lineNum << " ople)" << std::endl;
+				tokenLocation = charLocation;
+				break;
+			}
+			case opge:
+			{
+				c = textLine[charLocation];
+				charLocation++;
+
+				int index = 0;
+				currentState = States(stateChange(stateTable, opge, index));
+
+				std::cout << "(:token " << lineNum << " opge)" << std::endl;
+				tokenLocation = charLocation;
+				break;
+			}
+			case opshl:
+			{
+				c = textLine[charLocation];
+				charLocation++;
+
+				int index = 0;
+				currentState = States(stateChange(stateTable, opshl, index));
+
+				std::cout << "(:token " << lineNum << " opshl)" << std::endl;
+				tokenLocation = charLocation;
+
+				//std::cout << "Going To State: " << currentState << std::endl;
+				//std::cout << "charLocation: " << charLocation << std::endl;
+				break;
+			}
+			case opshr:
+			{
+				c = textLine[charLocation];
+				charLocation++;
+
+				int index = 0;
+				currentState = States(stateChange(stateTable, opshr, index));
+
+				std::cout << "(:token " << lineNum << " opshr)" << std::endl;
+				tokenLocation = charLocation;
+				break;
+			}
+			case exclaim:
+			{
+				c = textLine[charLocation];
+				charLocation++;
+
+				//loop through table and find character
+				int index = 0;
+				while (stateTable[0][index] != int(c) && index <= TABLELENGTH)
 				{
-					std::cout << "(:token " << lineNum << " brace1)" << std::endl;
-					currentState = start;
-					//tokenLocation++;
-					
-					break;
+					index++;
 				}
-				case brace2:
-				{
-					std::cout << "(:token " << lineNum << " brace2)" << std::endl;
-					currentState = start;
-					tokenLocation++;
-					
-					break;
-				}
-				case bracket1:
-				{
-					std::cout << "(:token " << lineNum << " brackets1)" << std::endl;
-					currentState = start;
-					tokenLocation++;
-					
-					break;
-				}
-				case bracket2:
-				{
-					std::cout << "(:token " << lineNum << " brackets2)" << std::endl;
-					currentState = start;
-					tokenLocation++;
-					
-					break;
-				}
-				case parens1:
-				{
-					std::cout << "(:token " << lineNum << " parens1)" << std::endl;
-					currentState = start;
-					tokenLocation++;
-					
-					break;
-				}
-				case parens2:
-				{
-					std::cout << "(:token " << lineNum << " parens2)" << std::endl;
-					currentState = start;
-					tokenLocation++;
-					;
-					break;
-				}
+
+				//SateChange Function
+				currentState = States(stateChange(stateTable, exclaim, index));
+				charLocation--;
+	
+				//Dont need to print this out
+
+				break;
+			}
 			}
 		}
 	}
@@ -551,13 +747,13 @@ void createTable(int arr[][TABLELENGTH])
 	arr[0][70] = 47; // /
 	arr[0][71] = 32; // whitespace
 
-	//Unpaired Delimiters
+					 //Unpaired Delimiters
 	arr[0][72] = 44; // ,
 	arr[0][73] = 59; // ;
 
 	arr[0][74] = 34; // "
 
-	//Paired Delimiters
+					 //Paired Delimiters
 	arr[0][75] = 60; // <
 	arr[0][76] = 62; // >
 	arr[0][77] = 123; // {
@@ -566,8 +762,9 @@ void createTable(int arr[][TABLELENGTH])
 	arr[0][80] = 93; // ]
 	arr[0][81] = 40; // (
 	arr[0][82] = 41; // )
+	arr[0][83] = 33; // !
 
-	/*-------------------State 1--------------------*/ //start
+					 /*-------------------State 1--------------------*/ //start
 	for (int i = 0; i < 53; i++) // LU send to state 2
 	{
 		arr[1][i] = 2;
@@ -576,6 +773,7 @@ void createTable(int arr[][TABLELENGTH])
 	{
 		arr[1][i] = 4;
 	}
+
 	arr[1][63] = 13;
 	arr[1][64] = 14;
 	arr[1][65] = 15;
@@ -597,9 +795,9 @@ void createTable(int arr[][TABLELENGTH])
 	arr[1][80] = 27; // ]
 	arr[1][81] = 28; // (
 	arr[1][82] = 29; // )
+	arr[1][83] = 36; // !
 
-
-	/*-------------------State 2--------------------*/ //ident
+					 /*-------------------State 2--------------------*/ //ident
 	for (int i = 0; i < 63; i++) // LUD send to state 2
 	{
 		arr[2][i] = 2;
@@ -634,7 +832,7 @@ void createTable(int arr[][TABLELENGTH])
 
 	arr[4][66] = 9; // Send to float state
 
-	/*-------------------State 5--------------------*/ //end number
+					/*-------------------State 5--------------------*/ //end number
 	for (int i = 0; i < TABLELENGTH; i++) // Anything back to state 1
 	{
 		arr[5][i] = 1;
@@ -647,7 +845,7 @@ void createTable(int arr[][TABLELENGTH])
 	}
 
 	arr[6][67] = 7; // = to state 7
-	/*-------------------State 7--------------------*/ // ==
+					/*-------------------State 7--------------------*/ // ==
 	for (int i = 0; i < TABLELENGTH; i++) // Anything back to 1
 	{
 		arr[7][i] = 1;
@@ -722,6 +920,8 @@ void createTable(int arr[][TABLELENGTH])
 		arr[17][i] = 4;
 	}
 
+	arr[17][76] = 30;  //send to oparrow ->
+
 	/*-------------------State 18--------------------*/ // plus +
 	for (int i = 0; i < TABLELENGTH; i++) // Anything back to 1
 	{
@@ -752,12 +952,16 @@ void createTable(int arr[][TABLELENGTH])
 	{
 		arr[22][i] = 1;
 	}
+	arr[22][67] = 32;  //send to <=
+	arr[22][75] = 34; //send to <<
 
 	/*-------------------State 23--------------------*/ // >
 	for (int i = 0; i < TABLELENGTH; i++) // Anything back to 1
 	{
 		arr[23][i] = 1;
 	}
+	arr[23][67] = 33;  //send to >=
+	arr[23][76] = 35; //send to >>
 
 	/*-------------------State 24--------------------*/ // {
 	for (int i = 0; i < TABLELENGTH; i++) // Anything back to 1
@@ -794,39 +998,53 @@ void createTable(int arr[][TABLELENGTH])
 	{
 		arr[29][i] = 1;
 	}
-}
-
-void printTable(int arr[][TABLELENGTH])
-{
-	std::cout << "-------------------Print Table------------------" << std::endl;
-	int j = 0;
+	/*--------------------------30-------------------*/
 	for (int i = 0; i < TABLELENGTH; i++)
 	{
-		if (j == 24)
-		{
-			std::cout << std::endl;
-			j = 0;
-		}
-		std::cout << char(arr[0][i]) << ' ';
-		j++;
+		arr[30][i] = 1;
 	}
-	std::cout << std::endl << "------------------------------------------------" << std::endl;
-}
+	for (int i = 0; i < TABLELENGTH; i++)
+	{
+		arr[30][i] = 1;
+	}
+	/*--------------------------31-------------------*/
+	for (int i = 0; i < TABLELENGTH; i++) // Anything back to 1
+	{
+		arr[31][i] = 1;
+	}
+	/*--------------------------32-------------------*/
+	for (int i = 0; i < TABLELENGTH; i++) // Anything back to 1
+	{
+		arr[32][i] = 1;
+	}
+	/*--------------------------33-------------------*/
+	for (int i = 0; i < TABLELENGTH; i++) // Anything back to 1
+	{
+		arr[33][i] = 1;
+	}
+	/*--------------------------34-------------------*/
+	for (int i = 0; i < TABLELENGTH; i++) // Anything back to 1
+	{
+		arr[34][i] = 1;
+	}
+	/*--------------------------35-------------------*/
+	for (int i = 0; i < TABLELENGTH; i++) // Anything back to 1
+	{
+		arr[35][i] = 1;
+	}
+	/*--------------------------36-------------------*/
+	for (int i = 0; i < TABLELENGTH; i++) //send everything to error state-----------------------------------------------------------------------------------------------MAKE ERROR STATE
+	{
+		arr[36][i] = 1;
+	}
+	arr[36][67] = 31; // will send to opne !=
 
-int stateChange(int arr[][TABLELENGTH], int currState, int index)
-{
-	return arr[currState][index];
-}
-
-char peek_token()
-{
-	return 0;
 }
 
 std::string checkForKey(std::string toCheck)
-{	
+{
 	std::string temp = toCheck;
-	
+
 	if (toCheck == "prog")
 		temp = "kwdprog";
 	else if (toCheck == "main")
@@ -857,11 +1075,38 @@ std::string checkForKey(std::string toCheck)
 		temp = "kwdnew";
 	else if (toCheck == "return")
 		temp = "kwdreturn";
-	
+
 	if (temp != toCheck) // Its a keyword, so change bool to true
 		isKey = true;
 	else
 		isKey = false;
-	
+
 	return temp;
+}
+
+void printTable(int arr[][TABLELENGTH])
+{
+	std::cout << "-------------------Print Table------------------" << std::endl;
+	int j = 0;
+	for (int i = 0; i < TABLELENGTH; i++)
+	{
+		if (j == 24)
+		{
+			std::cout << std::endl;
+			j = 0;
+		}
+		std::cout << char(arr[0][i]) << ' ';
+		j++;
+	}
+	std::cout << std::endl << "------------------------------------------------" << std::endl;
+}
+
+int stateChange(int arr[][TABLELENGTH], int currState, int index)
+{
+	return arr[currState][index];
+}
+
+char peek_token()
+{
+	return 0;
 }
