@@ -110,8 +110,18 @@ int main()
 				//std::cout << "stringSize: " << stringSize << std::endl;
 				for (int i = 0; i < stringSize - 1; i++)
 				{
-					temp[i] = textLine[tokenLocation];
-					tokenLocation++;
+					// If the character is a tab, do not include in character array
+					if ((int)textLine[tokenLocation] == 9)
+					{
+						tokenLocation++;
+						stringSize -= 1;
+						i--;
+					}
+					else
+					{
+						temp[i] = textLine[tokenLocation];
+						tokenLocation++;
+					}
 				}
 				temp[stringSize - 1] = '\0';
 				currentToken = std::string(temp);
@@ -377,8 +387,18 @@ int main()
 				//std::cout << "stringSize: " << stringSize << std::endl;
 				for (int i = 0; i < stringSize - 1; i++)
 				{
-					temp[i] = textLine[tokenLocation];
-					tokenLocation++;
+					// If the character is a tab, do not include in character array
+					if ((int)textLine[tokenLocation] == 9)
+					{
+						tokenLocation++;
+						stringSize -= 1;
+						i--;
+					}
+					else
+					{
+						temp[i] = textLine[tokenLocation];
+						tokenLocation++;
+					}
 				}
 				temp[stringSize - 1] = '\0';
 				currentToken = std::string(temp);
