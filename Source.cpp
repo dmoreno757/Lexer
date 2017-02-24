@@ -338,6 +338,7 @@ int main()
 				//std::cout << "Going To State: " << currentState << std::endl;
 				//std::cout << "charLocation: " << charLocation << std::endl << std::endl;
 				//tokenLocation = charLocation;
+				break;
 			}
 			case stringStart:
 			{
